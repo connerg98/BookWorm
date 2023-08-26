@@ -2,21 +2,18 @@
 //  DetailView.swift
 //  BookWorm
 //
-//  Created by Conner Glasgow on 8/26/23.
+//  Created by Conner Glasgow on 4/16/22.
 //
 
-import SwiftUI
 import CoreData
+import SwiftUI
 
-
-struct DetailView: View {
-    @Environment(\.managedObjectContext) var context
+struct OldDetailView: View {
+    var book: Book
+    
+    @Environment(\.managedObjectContext) var moc
     @Environment(\.dismiss) var dismiss
     @State private var showingDeleteAlert = false
-    
-    @EnvironmentObject private var bookVM: BookViewModel
-    
-    let book: Book
     
     var body: some View {
         ScrollView {
@@ -41,9 +38,9 @@ struct DetailView: View {
 
             Text(book.review ?? "No review")
                 .padding()
-            
-            RatingView(rating: .constant(book.rating))
-                .font(.largeTitle)
+
+//            RatingView(rating: .constant(Int(book.rating)))
+//                .font(.largeTitle)
         }
         .navigationTitle(book.title ?? "Unknown Book")
         .navigationBarTitleDisplayMode(.inline)
@@ -63,16 +60,9 @@ struct DetailView: View {
     }
     
     func deleteBook() {
-//        guard let index = bookVM.books.firstIndex(where: { $0.id == book.id }) else { return }
-        guard let index = bookVM.indexOf(book) else { return }
-        
-        bookVM.delete(at: index, context: context)
+        moc.delete(book)
+
+        try? moc.save()
         dismiss()
     }
 }
-
-//struct DetailView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        DetailView()
-//    }
-//}

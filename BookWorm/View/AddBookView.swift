@@ -2,31 +2,29 @@
 //  AddBookView.swift
 //  BookWorm
 //
-//  Created by Conner Glasgow on 4/15/22.
+//  Created by Conner Glasgow on 8/26/23.
 //
 
 import SwiftUI
 
 struct AddBookView: View {
-    @Environment(\.managedObjectContext) var moc
+    @Environment(\.managedObjectContext) var context
     @Environment(\.dismiss) var dismiss
     
-    @State private var title = ""
-    @State private var author = ""
-    @State private var rating = 1
-    @State private var genre = ""
-    @State private var review = ""
+    @EnvironmentObject private var bookVM: BookViewModel
     
-    let genres = ["Fantasy", "Horror", "Kids", "Mystery", "Poetry", "Romance", "Thriller"]
+    @State private var book = BookModel(title: "", author: "", rating: 1, review: "", genre: Genres.fantasy.rawValue)
+    
+    private let genres = ["Fantasy", "Horror", "Kids", "Mystery", "Poetry", "Romance", "Thriller"]
     
     var body: some View {
         NavigationView {
             Form {
                 Section {
-                    TextField("Title", text: $title)
-                    TextField("Author", text: $author)
+                    TextField("Title", text: $book.title)
+                    TextField("Author", text: $book.author)
                     
-                    Picker("Genre", selection: $genre) {
+                    Picker("Genre", selection: $book.genre) {
                         ForEach(genres, id: \.self) {
                             Text($0)
                         }
@@ -34,23 +32,15 @@ struct AddBookView: View {
                 }
                 
                 Section {
-                    TextEditor(text: $review)
-                    RatingView(rating: $rating)
+                    TextEditor(text: $book.review)
+                    RatingView(rating: $book.rating)
                 } header: {
                     Text("Write a review")
                 }
                 
                 Section {
                     Button("Save") {
-                        let newBook = Book(context: moc)
-                        newBook.id = UUID()
-                        newBook.title = title
-                        newBook.author = author
-                        newBook.genre = genre
-                        newBook.rating = Int16(rating)
-                        newBook.review = review
-                        
-                        try? moc.save()
+                        bookVM.createBook(book, context: context)
                         
                         dismiss()
                     }
